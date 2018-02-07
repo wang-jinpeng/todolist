@@ -1,0 +1,168 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Document</title>
+    <link rel="stylesheet" href="cs/bootstrap.min.css">
+</head>
+<style>
+    *{
+        margin: 0;
+        padding: 0;
+        list-style: none;
+    }
+    .container .title{
+        display: block;
+        text-align: center;
+        font-size: 36px;
+        color: deepskyblue;
+        margin: 0 auto;
+        padding-top: 50px;
+    }
+    .container .shuru{
+        display: block;
+        width: 800px;
+        height: 40px;
+        margin: 0 auto;
+    }
+    .container .btn{
+        margin-top: 20px;
+        width: 200px;
+        height: 30px;
+        float: right;
+        margin-right: 100px;
+    }
+    .listbox{
+        width: 800px;
+        padding-top: 100px;
+        margin: 0 auto;
+    }
+    .listbox li{
+        border-bottom: 1px solid deepskyblue;
+        height: 30px;
+        line-height: 30px;
+        font-size: 20px;
+    }
+    .listbox li .done{
+        display: block;
+        width: 20px;
+        height: 20px;
+        border-radius: 50%;
+        float: left;
+        border: 1px solid #000000;
+        margin-top: 5px;
+    }
+    .listbox li .con{
+        display: block;
+        float: left;
+        margin-left: 10px;
+    }
+    .listbox li .del{
+        display: block;
+        height: 20px;
+        width: 36px;
+        float: right;
+        background: #cccccc;
+        border-radius: 5px;
+        cursor: pointer;
+        font-size: 16px;
+        text-align: center;
+        line-height: 20px;
+        margin-top: 5px;
+    }
+    .active{
+        background: deepskyblue;
+    }
+    .select{
+        color: deepskyblue;
+    }
+</style>
+<body>
+<div class="container">
+    <h3 class="title">to do list</h3>
+    <input type="text" class="shuru" placeholder="请输入内容" v-model="con" @keydown.13="save()"/>
+    <div class="btn">
+        <input type="button" value="未完成" @click="changeStatus(0)" :class="{select:status==0}">
+        <input type="button" value="已完成" @click="changeStatus(1)" :class="{select:status==1}">
+        <input type="button" value="全部" @click="changeStatus('all')" :class="{select:status=='all'}">
+    </div>
+    <ul class="listbox" v-show="datas.length>0">
+        <li class="list" v-for="item in datas">
+            <div v-show="item.save">
+                <span class="done" @click="changeState(item)" :class="{active:item.state==1}"></span>
+                <span class="con" @dblclick="edit(item)">{{item.con}}</span>
+                <span class="del" @click="del(item.id)">删除</span>
+            </div>
+            <div v-show="!item.save">
+                <input type="text" v-model="item.con" @blur="edit(item)"/>
+            </div>
+        </li>
+    </ul>
+    <ul class="listbox" v-show="datas.length==0">
+        没有数据
+    </ul>
+</div>
+</body>
+<script src="js/vue.js"></script>
+<script>
+    new Vue({
+        el : ".container",
+        data : {
+            all:localStorage.todo?JSON.parse(localStorage.todo):[],
+            con:"",
+            status:"all"
+        },
+        methods : {
+            save(){
+                var obj={};
+                obj.con=this.con;
+                obj.id=new Date().getTime();
+                obj.state=0;
+                obj.save=true;
+                this.all.push(obj);
+                localStorage.todo=JSON.stringify(this.all);
+                this.con=""
+            },
+            del(id){
+                this.all=this.all.filter(function (item) {
+                    if (item.id!==id){
+                        return item
+                    }
+                })
+                localStorage.todo=JSON.stringify(this.all);
+            },
+            changeState(item){
+                if (item.state==0){
+                    item.state=1
+                }else {
+                    item.state=0
+                }
+            },
+            changeStatus(num){
+                this.status=num
+            },
+            edit(item){
+                item.save=!item.save;
+
+                localStorage.todo=JSON.stringify(this.all);
+            }
+        },
+        computed : {
+            datas(){
+                return this.all.filter((item)=> {
+                    if (this.status=="all"){
+                        return item
+                    } else {
+                        if (item.state==this.status){
+                            return item
+                        }
+                    }
+                })
+            }
+        }
+    })
+</script>
+</html>
